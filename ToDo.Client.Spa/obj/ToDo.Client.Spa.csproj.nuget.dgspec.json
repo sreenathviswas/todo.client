@@ -1,0 +1,70 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/sreenath/Projects/ireland/todo/todo.client/ToDo.Client.Spa/ToDo.Client.Spa.csproj": {}
+  },
+  "projects": {
+    "/Users/sreenath/Projects/ireland/todo/todo.client/ToDo.Client.Spa/ToDo.Client.Spa.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/sreenath/Projects/ireland/todo/todo.client/ToDo.Client.Spa/ToDo.Client.Spa.csproj",
+        "projectName": "ToDo.Client.Spa",
+        "projectPath": "/Users/sreenath/Projects/ireland/todo/todo.client/ToDo.Client.Spa/ToDo.Client.Spa.csproj",
+        "packagesPath": "/Users/sreenath/.nuget/packages/",
+        "outputPath": "/Users/sreenath/Projects/ireland/todo/todo.client/ToDo.Client.Spa/obj/",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "/Users/sreenath/.config/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "dependencies": {
+            "Microsoft.AspNetCore.Authentication.AzureAD.UI": {
+              "target": "Package",
+              "version": "[3.1.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/3.1.100/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
