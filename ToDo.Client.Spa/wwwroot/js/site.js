@@ -31,27 +31,10 @@ $(document).ready(function () {
 		var todo = $('#todo-list-item').val();
 
 		if (todo) {
-			clientApplication.acquireTokenSilent(request)
-				.then(function (response) {
-					createTodo(todo, response.accessToken);
-				})
-				.catch(err => {
-					if (isReLoginError(err)) {
-						clientApplication.acquireTokenPopup(request).then(
-							function (response) {
-								createTodo(todo, response.accessToken);
-							}).catch(function (error) {
-								console.log(error);
-							});
-					} else {
-						console.log(err.errorMessage);
-						clientApplication.loginPopup().then(function (token) {
-							console.log(token);
-						});
-					}
-				});
+			getToken(request).then(tokenResponse => {
+				createTodo(todo, tokenResponse.accessToken);
+			});
 		}
-
 	});
 
 	$(document).on('change', '.checkbox', function () {
@@ -60,50 +43,19 @@ $(document).ready(function () {
 		todo.id = elm.data('id');
 		todo.content = elm.parent().find('label').text();
 		todo.isCompleted = !elm.attr('checked');
-		clientApplication.acquireTokenSilent(request)
-			.then(function (response) {
-				updateTodo(todo, elm, response.accessToken);
-			})
-			.catch(err => {
-				if (isReLoginError(err)) {
-					clientApplication.acquireTokenPopup(request).then(
-						function (response) {
-							updateTodo(todo, elm, response.accessToken);
-						}).catch(function (error) {
-							console.log(error);
-						});
-				} else {
-					console.log(err.errorMessage);
-					clientApplication.loginPopup().then(function (token) {
-						console.log(token);
-					});
-				}
-			});
+
+		getToken(request).then(tokenResponse => {
+			updateTodo(todo, elm, tokenResponse.accessToken);
+		});
 	});
 
 	$(document).on('click', '.remove', function () {
 		var id = $(this).data('id');
 		var doneItem = $(this).parent();
 
-		clientApplication.acquireTokenSilent(request)
-			.then(function (response) {
-				deleteTodo(id, doneItem, response.accessToken);
-			})
-			.catch(err => {
-				if (isReLoginError(err)) {
-					clientApplication.acquireTokenPopup(request).then(
-						function (response) {
-							deleteTodo(id, doneItem, response.accessToken);
-						}).catch(function (error) {
-							console.log(error);
-						});
-				} else {
-					console.log(err.errorMessage);
-					clientApplication.loginPopup().then(function (token) {
-						console.log(token);
-					});
-				}
-			});
+		getToken(request).then(tokenResponse => {
+			deleteTodo(id, doneItem, tokenResponse.accessToken);
+		});
 	});
 
 });
@@ -124,7 +76,7 @@ function fetchAllTodo(accessToken) {
 		dataType: 'json',
 		success: function (data, textStatus, jqXHR) {
 			for (var i = 0; i < data.length; i++) {
-				var markup = `<li class='${data[i].isCompleted ? 'completed' : ''}'><input class='checkbox' type='checkbox' data-id='${data[i].id}'/><label>${data[i].content}</label><a class='remove' data-id='${data[i].id}'>x</a><hr></li>`;
+				var markup = `<li class='${data[i].isCompleted ? 'completed' : ''}'><input class='checkbox' type='checkbox' data-id='${data[i].id}' ${data[i].isCompleted ? 'checked' : ''}/><label>${data[i].content}</label><a class='remove' data-id='${data[i].id}'>x</a><hr></li>`;
 				$('#list-items').prepend(markup);
 				$('#todo-list-item').val("");
 			}
@@ -136,24 +88,9 @@ function fetchAllTodo(accessToken) {
 }
 
 function getAllTodo() {
-	clientApplication.acquireTokenSilent(request)
-		.then(function (response) {
-			fetchAllTodo(response.accessToken);
-		})
-		.catch(err => {
-			if (isReLoginError(err)) {
-				clientApplication.acquireTokenPopup(request).then(
-					function (response) {
-						fetchAllTodo(response.accessToken);
-					}).catch(function (error) {
-						console.log(error);
-					});
-			} else {
-				console.log(err.errorMessage);
-				clientApplication.loginPopup().then(function (token) {
-				});
-			}
-		});
+	getToken(request).then(tokenResponse => {
+		fetchAllTodo(tokenResponse.accessToken);
+	});
 }
 
 function createTodo(todo, accessToken) {
@@ -170,7 +107,7 @@ function createTodo(todo, accessToken) {
 		}),
 		dataType: 'json',
 		success: function (data, textStatus, jqXHR) {
-			var markup = `<li class='${data.isCompleted ? 'completed' : ''}'><input class='checkbox' type='checkbox' data-id='${data.id}'/><label>${data.content}</label><a class='remove' data-id='${data.id}'>x</a><hr></li>`;
+			var markup = `< li class='${data.isCompleted ? 'completed' : ''}' > <input class='checkbox' type='checkbox' data-id='${data.id}' ${data.isCompleted ? 'checked' : ''}/><label>${data.content}</label><a class='remove' data-id='${data.id}'>x</a><hr></li>`;
 			$('#list-items').prepend(markup);
 			$('#todo-list-item').val("");
 		},
@@ -219,6 +156,23 @@ function updateTodo(todo, elem, accessToken) {
 		},
 		error: function (jqXHR, textStatus, errorThrown) {
 
+		}
+	});
+}
+
+function getToken(tokenRequest) {
+	return clientApplication.acquireTokenSilent(tokenRequest).catch(function (error) {
+		if (isReLoginError(err)) {
+			return clientApplication.acquireTokenPopup(tokenRequest).then(function (tokenResponse) {
+			}).catch(function (error) {
+				logMessage("Failed token acquisition", error);
+			});
+		}
+		else {
+			console.log(err.errorMessage);
+			clientApplication.loginPopup().then(function (token) {
+				return getToken(request);
+			});
 		}
 	});
 }
