@@ -55,16 +55,30 @@ $(document).ready(function () {
 	});
 
 	$(document).on('change', '.checkbox', function () {
-		if ($(this).attr('checked')) {
-			$(this).removeAttr('checked');
-		}
-		else {
-			$(this).attr('checked', 'checked');
-		}
-
-		$(this).parent().toggleClass('completed');
-
-		localStorage.setItem('listItems', $('#list-items').html());
+		var elm = $(this);
+		var todo = {};
+		todo.id = elm.data('id');
+		todo.content = elm.parent().find('label').text();
+		todo.isCompleted = !elm.attr('checked');
+		clientApplication.acquireTokenSilent(request)
+			.then(function (response) {
+				updateTodo(todo, elm, response.accessToken);
+			})
+			.catch(err => {
+				if (isReLoginError(err)) {
+					clientApplication.acquireTokenPopup(request).then(
+						function (response) {
+							updateTodo(todo, elm, response.accessToken);
+						}).catch(function (error) {
+							console.log(error);
+						});
+				} else {
+					console.log(err.errorMessage);
+					clientApplication.loginPopup().then(function (token) {
+						console.log(token);
+					});
+				}
+			});
 	});
 
 	$(document).on('click', '.remove', function () {
@@ -110,7 +124,7 @@ function fetchAllTodo(accessToken) {
 		dataType: 'json',
 		success: function (data, textStatus, jqXHR) {
 			for (var i = 0; i < data.length; i++) {
-				var markup = `<li><input class='checkbox' type='checkbox' data-id='${data[i].id}'/>${data[i].content}<a class='remove' data-id='${data[i].id}'>x</a><hr></li>`;
+				var markup = `<li class='${data[i].isCompleted ? 'completed' : ''}'><input class='checkbox' type='checkbox' data-id='${data[i].id}'/><label>${data[i].content}</label><a class='remove' data-id='${data[i].id}'>x</a><hr></li>`;
 				$('#list-items').prepend(markup);
 				$('#todo-list-item').val("");
 			}
@@ -156,7 +170,7 @@ function createTodo(todo, accessToken) {
 		}),
 		dataType: 'json',
 		success: function (data, textStatus, jqXHR) {
-			var markup = `<li><input class='checkbox' type='checkbox' data-id='${data.id}'/>${data.content}<a class='remove' data-id='${data.id}'>x</a><hr></li>`;
+			var markup = `<li class='${data.isCompleted ? 'completed' : ''}'><input class='checkbox' type='checkbox' data-id='${data.id}'/><label>${data.content}</label><a class='remove' data-id='${data.id}'>x</a><hr></li>`;
 			$('#list-items').prepend(markup);
 			$('#todo-list-item').val("");
 		},
@@ -177,6 +191,33 @@ function deleteTodo(id, doneItem, accessToken) {
 			doneItem.remove();
 		},
 		error: function () {
+
+		}
+	});
+}
+
+function updateTodo(todo, elem, accessToken) {
+	$.ajax({
+		url: `https://localhost:5001/api/todo/${todo.id}`,
+		headers: {
+			'Accept': 'application/json',
+			'Content-Type': 'application/json',
+			'Authorization': 'Bearer ' + accessToken,
+		},
+		type: "PUT",
+		data: JSON.stringify(todo),
+		dataType: 'json',
+		success: function (data, textStatus, jqXHR) {
+			if (elem.attr('checked')) {
+				elem.removeAttr('checked');
+			}
+			else {
+				elem.attr('checked', 'checked');
+			}
+
+			elem.parent().toggleClass('completed');
+		},
+		error: function (jqXHR, textStatus, errorThrown) {
 
 		}
 	});
