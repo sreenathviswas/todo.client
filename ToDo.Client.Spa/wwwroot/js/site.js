@@ -6,8 +6,8 @@
 const msalConfig = {
 	//popUp: true,
 	auth: {
-		clientId: "b2027100-cc3f-4f65-8879-8aa29bff9204",
-		authority: "https://login.microsoftonline.com/7ad4009f-0ead-4576-81ba-3ad93dccbc9f",
+		clientId: "72e1f28a-40ce-40b9-afcd-cb95792d6bd2",
+		authority: "https://login.microsoftonline.com/b6f45924-ab11-4bec-9748-e6132f6712d0",
 		validateAuthority: false,
 		redirectUri: "https://localhost:5002",
 	},
@@ -19,7 +19,7 @@ const msalConfig = {
 clientApplication = new Msal.UserAgentApplication(msalConfig);
 
 var request = {
-	scopes: ['api://61c387ae-7147-4642-8deb-f2b13f88f0e2/.default']
+	scopes: ['api://836301a5-6450-4c3b-88bb-e6556f0b026a/.default']
 }
 
 $(document).ready(function () {
@@ -107,7 +107,7 @@ function createTodo(todo, accessToken) {
 		}),
 		dataType: 'json',
 		success: function (data, textStatus, jqXHR) {
-			var markup = `< li class='${data.isCompleted ? 'completed' : ''}' > <input class='checkbox' type='checkbox' data-id='${data.id}' ${data.isCompleted ? 'checked' : ''}/><label>${data.content}</label><a class='remove' data-id='${data.id}'>x</a><hr></li>`;
+			var markup = `<li class='${data.isCompleted ? 'completed' : ''}' > <input class='checkbox' type='checkbox' data-id='${data.id}' ${data.isCompleted ? 'checked' : ''}/><label>${data.content}</label><a class='remove' data-id='${data.id}'>x</a><hr></li>`;
 			$('#list-items').prepend(markup);
 			$('#todo-list-item').val("");
 		},
@@ -162,14 +162,14 @@ function updateTodo(todo, elem, accessToken) {
 
 function getToken(tokenRequest) {
 	return clientApplication.acquireTokenSilent(tokenRequest).catch(function (error) {
-		if (isReLoginError(err)) {
+		if (isReLoginError(error)) {
 			return clientApplication.acquireTokenPopup(tokenRequest).then(function (tokenResponse) {
 			}).catch(function (error) {
 				logMessage("Failed token acquisition", error);
 			});
 		}
 		else {
-			console.log(err.errorMessage);
+			console.log(error.errorMessage);
 			clientApplication.loginPopup().then(function (token) {
 				return getToken(request);
 			});
